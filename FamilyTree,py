@@ -1,0 +1,93 @@
+from Person import Person
+
+class FamilyTree():
+    def __init__ (self, grandfather,):
+        self.root = grandfather
+        self.size = 1
+        self.max_lvl = 1
+                 
+    def AddPerson (self,dad_name,dad_birthday,child_name,child_birthday,child_deathday):
+        """Gets tow persons by name and add child  
+        input: 
+            name1,name2
+        return:
+            None 
+        """
+        qeue = []
+        qeue.append(self.root)
+        while len(qeue) > 0:
+            k = qeue.pop()
+            if k.name == dad_name and k.birthday == dad_birthday:
+                k.add_child(child_name,child_birthday,child_deathday)
+                qeue = []
+                print('successfully added ')
+                return
+            for c in k.children:
+                qeue.append(c)
+        print('Person with name: ',dad_name,' and birth day: ',dad_birthday,' not found!')
+        return           
+    
+    def RemovePerson (self,person_name,person_birthday):
+        print('Removing a person will remove all his children')
+        a = input("you sure you want to remove? /n(Yes|No)")
+        if not (a.lower() == 'yes' or a.lower() == 'y'):
+            print('not removing so!')
+            return
+        qeue = []
+        qeue.append(self.root)
+        while len(qeue) > 0:
+            k = qeue.pop()
+            for c in k.children:
+                if c.name == person_name and c.birthday == person_birthday:
+                    k.children.remove(c)
+                    print('successfully removed ')
+                    return
+                qeue.append(c)
+        print('person with name: ' + person_name , 'and birthday: ' + person_birthday , ' not found!')
+        return        
+    
+    def GetSize(self):
+        qeue = []
+        size = 0
+        qeue.append(self.root)
+        while len(qeue) > 0:
+            k = qeue.pop()
+            for c in k.children:
+                qeue.append(c)
+            size +=1
+        print('size: ' + size)
+        return size
+    
+    def FindPerson (self, person_name):
+        
+        pass
+    
+    def FindParent(name1, name2):
+        """Gets tow persons by name and find if one is child of other one
+        input: 
+            name1,name2
+        return:
+            True if name1 is child of name2 (or vice versa) and False otherwise
+        """
+        pass
+    
+    def FindLeastCommonSubsumer(name1, name2):
+        pass
+     
+    def FindRelation(name1, name2):
+        """Gets tow persons by name and find relationships between them
+        input: 
+            name1,name2
+        return:
+            relationship 
+        """
+        pass
+    
+    def FindFarestBorn(name1):
+        pass
+    
+    def FindFarestRelations():
+        pass
+    
+    def Hash(self):
+        return ' '
