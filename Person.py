@@ -44,5 +44,6 @@ class Person():
             None
         """
         self.children.append(Person(name,birth_day,self,death_day,))
-                
+    def Hash(self):
+        return ' '            
     
