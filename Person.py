@@ -41,6 +41,8 @@ class Person():
             None
         """
         self.children.append(Person(name,birth_day,self,death_day,))
+    def __del__(self):
+        Person.all_persons.remove(self)
     def Hash(self):
         return ' '            
     
