@@ -18,11 +18,6 @@ class FamilyTree():
         """
         if self.root.name == person_name and self.root.birth_day == person_birthday:
             return self.root
-        else:
-            print("Not a root!")
-            print(self.root)
-            print(self.root.name)
-            print(self.root.birth_day)
         qeue = []
         root = self.root if root is None else root
         qeue.append(root)
@@ -32,7 +27,7 @@ class FamilyTree():
                 if c.name == person_name and c.birth_day == person_birthday:
                     return c
                 qeue.append(c)
-        return 'person with name: ' + person_name , 'and birthday: ' + str(person_birthday) , ' not found in ', root.name,'\'s child'
+        return 'person with name: ' + person_name + 'and birthday: ' + str(person_birthday) + ' not found in '+ root.name+'\'s child'
     
     def AddPerson (self,parent_name,parent_birthday,child_name,child_birthday,child_deathday=None):
         """Gets tow persons by name and birthday then add child   
@@ -43,9 +38,12 @@ class FamilyTree():
         """
         parent = self.FindPerson(parent_name,parent_birthday)
         if type(parent) != str:
-            child = Person(child_name,child_birthday,parent,child_deathday)
+            child = Person(child_name,int(child_birthday),parent,child_deathday)
             parent.AddChild(child)
-            self.All[child_name] = {child_birthday : child }
+            if not self.All.get(child_name):
+                self.All[child_name] = {int(child_birthday) : child }
+            else:
+                self.All[child_name][int(child_birthday)]=  child 
             return (child_name+" Successfully added")
         return parent          
     
@@ -56,18 +54,13 @@ class FamilyTree():
         return:
             None 
         """
-        print('Removing a person will remove all his children')
-        a = input("you sure you want to remove?"+ "/n(Yes|No)")
-        if not (a.lower() == 'yes' or a.lower() == 'y'):
-            print('not removing so!')
-            return
-        p = self.FindPerson(person_name,person_birthday)
-        print("person_name: ", p.name)
-        if p is not None:
+        person = self.FindPerson(person_name,person_birthday)
+        print(type(person))
+        if type(person) != str :
             child_list = []
-            child_list.append(p)
+            child_list.append(person)
             qeue = []
-            qeue.append(p)
+            qeue.append(person)
             while len(qeue) > 0:
                 q = qeue.pop()
                 for c in q.children:
@@ -80,10 +73,10 @@ class FamilyTree():
                 parent.children.remove(c)
                 del self.All[name][birthday] 
                 if not len(self.All[name]):
-                    del self.All[name] 
-                print(self.All)              
+                    del self.All[name]              
                 del c
-        return        
+            return (person_name+' Successfully Removed')
+        return person        
     
     def GetAllPersons(self):
         res = []

@@ -73,7 +73,7 @@ class SubMenu(QWidget):
         # Create the buttons and connect them to the functions
         self.button1 = QPushButton("Add new person")
         self.button1.clicked.connect(self.function1)
-        self.button2 = QPushButton("Function 2")
+        self.button2 = QPushButton("Remove a person")
         self.button2.clicked.connect(self.function2)
         self.button3 = QPushButton("Function 3")
         self.button3.clicked.connect(self.function3)
@@ -111,7 +111,11 @@ class SubMenu(QWidget):
         self.hide()
 
     def function2(self):
-        print("Function 2")
+        # Create an instance of the new screen widget
+        self.new_screen = RemovePersonScreen(self)
+        # Show the new screen and hide the sub menu
+        self.new_screen.show()
+        self.hide()
 
     def function3(self):
         print("Function 3")
@@ -137,12 +141,12 @@ class SubMenu(QWidget):
         main_menu.show()
         self.close()
 
-# Define the new screen widget class
+# Define the AddPersonScreen widget class
 class AddPersonScreen(QWidget):
     def __init__(self,submenu):
         super().__init__()
         # Set the window title and size
-        self.setWindowTitle("New Screen")
+        self.setWindowTitle("Add person Screen")
         self.resize(300, 200)
         # Create a grid layout to arrange the widgets
         layout = QGridLayout()
@@ -157,7 +161,7 @@ class AddPersonScreen(QWidget):
         # Connect the button's clicked signal to a function
         self.button.clicked.connect(self.get_inputs_and_option)
         # Add the widgets to the layout
-        self.list_label = QLabel("Choose a Person(name_birthday)")
+        self.list_label = QLabel("Choose The parent(name_birthday)")
         self.input1_label = QLabel("Enter child's name")
         self.input2_label = QLabel("Enter child's birthday")
         
@@ -191,6 +195,48 @@ class AddPersonScreen(QWidget):
         self.text_screen.show()
         self.hide()
 
+# Define the RemovePersonScreen widget class
+class RemovePersonScreen(QWidget):
+    def __init__(self,submenu):
+        super().__init__()
+        # Set the window title and size
+        self.setWindowTitle("Remove Person Screen")
+        self.resize(300, 200)
+        # Create a grid layout to arrange the widgets
+        layout = QGridLayout()
+        # Create a list widget and add some items to it
+        self.list_widget = QListWidget()
+        options = tree.GetAllPersons()
+        self.list_widget.addItems(options)
+        self.button = QPushButton("Remove Person")
+        # Connect the button's clicked signal to a function
+        self.button.clicked.connect(self.get_inputs_and_option)
+        # Add the widgets to the layout
+        self.list_label = QLabel("Choose a Person(name_birthday)")
+        layout.addWidget(self.list_widget, 1, 0, 1, 2)
+        layout.addWidget(self.button, 2, 0, 1, 2)
+        # Add the labels to the layout
+        layout.addWidget(self.list_label, 0, 0, 1, 2, alignment=Qt.AlignTop | Qt.AlignLeft)
+        
+        # Set the layout for the widget
+        self.setLayout(layout)
+        self.submenu = submenu
+    # Define the function to get the inputs and the option
+    def get_inputs_and_option(self):
+        # Get the text from the input widgets
+        # Get the current item from the list widget
+        option = self.list_widget.currentItem().text()
+        # Call another function with the inputs and the option
+        if  option != '':
+            text = tree.RemovePerson(option.split('_')[0].strip(), int(option.split('_')[1].strip()))
+        # Create an instance of the screen that shows the text
+        else:
+            text = 'Wrong inputs...'
+        self.text_screen = TextScreen(text,self.submenu)
+        # Show the text screen and hide the new screen
+        self.text_screen.show()
+        self.hide()
+
 
 class TextScreen(QWidget):
     def __init__(self,text,back_menu):
@@ -208,7 +254,7 @@ class TextScreen(QWidget):
         # Set the layout for the widget
         self.setLayout(layout)
         # Create a timer that will trigger a function after 3 seconds
-        QTimer.singleShot(2000, self.back_to_sub_menu)
+        QTimer.singleShot(100, self.back_to_sub_menu)
         self.back_menu = back_menu
     # Define the function that will be triggered by the timer
     def back_to_sub_menu(self):
@@ -233,6 +279,7 @@ def custom_tree(tree: FamilyTree):
         tree.AddPerson(p.name,p.birth_day,c_name,c_birth_day)
 
 tree = FamilyTree('Reza',1700,1740)
+tree.AddPerson('Reza',1700,'moh',1738)
 print(tree.root.name)
 # custom_tree(tree)
 # print(tree.All)
