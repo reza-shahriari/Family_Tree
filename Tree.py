@@ -1,8 +1,8 @@
 from Person import Person
 
 class FamilyTree():
-    def __init__ (self, grandfather,):
-        self.root = grandfather
+    def __init__ (self, grandfather_name,grandfather_birthday,grandfather_deathday=None):
+        self.root = Person(grandfather_name,grandfather_birthday,None,grandfather_deathday)
         self.size = 1
         self.max_lvl = 1
         self.All = dict()
@@ -16,6 +16,8 @@ class FamilyTree():
         return:
             None 
         """
+        if self.root.name == person_name and self.root.birth_day == person_birthday:
+            return self.root
         qeue = []
         root = self.root if root is None else root
         qeue.append(root)
@@ -25,7 +27,7 @@ class FamilyTree():
                 if c.name == person_name and c.birth_day == person_birthday:
                     return c
                 qeue.append(c)
-        print('person with name: ' + person_name , 'and birthday: ' + person_birthday , ' not found in ', root.name,'\'s child')
+        print('person with name: ' + person_name , 'and birthday: ' + str(person_birthday) , ' not found in ', root.name,'\'s child')
         return None    
     
     def AddPerson (self,dad_name,dad_birthday,child_name,child_birthday,child_deathday=None):
@@ -54,17 +56,22 @@ class FamilyTree():
         if not (a.lower() == 'yes' or a.lower() == 'y'):
             print('not removing so!')
             return
-        qeue = []
-        qeue.append(self.root)
-        while len(qeue) > 0:
-            k = qeue.pop()
-            for c in k.children:
-                if c.name == person_name and c.birth_day == person_birthday:
-                    k.children.remove(c)
-                    print('successfully removed ')
-                    return
-                qeue.append(c)
-        print('person with name: ' + person_name , 'and birthday: ' + person_birthday , ' not found!')
+        p = self.FindPerson(person_name,person_birthday)
+        if p is not None:
+            child_list = []
+            qeue = []
+            qeue.append(p)
+            while len(qeue) > 0:
+                q = qeue.pop()
+                for c in q.children:
+                    child_list.append(c)
+                    qeue.append(c)
+            for c in child_list:
+                name = c.name
+                birthday = c.birthday
+                del self.All[name][birthday] 
+                del c
+                
         return        
     
     def GetSize(self):
@@ -85,7 +92,7 @@ class FamilyTree():
         print('size: ' + size)
         return size
      
-    def FindParent(self,dad_name,dad_birthday,child_name,child_birthday):
+    def CheckIsParent(self,dad_name,dad_birthday,child_name,child_birthday):
         """Gets tow persons by name and birthday then find if some on is chile of another one
             not only his child but also child of his child and so on!
         input: 
@@ -104,6 +111,23 @@ class FamilyTree():
             print(dad_name ,' is father of ',child_name)
             return True
     
+    def FindAllParents(self,person_name,person_birthday):
+        """Gets a person by name and birthday then find all parents of that person
+            input: 
+                person_name, person_birthday
+            return:
+                parant_list 
+        """
+        c = self.FindPerson(person_name, person_birthday)
+        parent_list = []
+        if c is not None:
+            m = c.parent
+            while m != self.root:
+                parent_list.append(m)
+                m = m.parent
+            parent_list.append(m)
+        return parent_list
+            
     def FindLCA(self,person1_name, person1_birthday ,person2_name, person2_birthday):
         """Gets tow persons by name and birthday then find lowest common ancestor of them
         input: 
@@ -115,9 +139,41 @@ class FamilyTree():
         person2 = self.FindPerson(person2_name, person2_birthday)
         if person1 is None or person2 is None:
             return
-        dad1_list = []
-        dad2_list = []
-        
+        dad1_list = self.FindAllParents(person1_name, person1_birthday)
+        dad2_list = self.FindAllParents(person2_name, person2_birthday)
+        i = -1
+        while dad1_list[i] == dad2_list[i] and (abs(i)-1) < min(len(dad1_list), len(dad2_list)):
+            i-=1
+        return dad1_list[i]
+    
+
+    
+    def FindFarestBorn(self,person_name, person_birthday):
+        """Gets a person by name and birthday then find farest born of him
+            input: 
+                person_name, person_birthday
+            return:
+                farest born
+        """
+        p = self.FindPerson(person_name,person_birthday)
+        farest_born = p
+        if p is not None:
+            qeue = []
+            qeue.append(p)
+            while len(qeue) > 0:
+                k = qeue.pop()
+                for c in k.children:
+                    qeue.append(c)
+                if k.level > farest_born.level:
+                    fraset_born = k
+        if farest_born == p:
+            print("No child!")
+        else:
+            return farest_born
+    
+    def FindFarestRelations():
+        pass
+    
     def FindRelation(name1, name2):
         """Gets tow persons by name and find relationships between them
         input: 
@@ -125,11 +181,5 @@ class FamilyTree():
         return:
             relationship 
         """
-        pass
-    
-    def FindFarestBorn(name1):
-        pass
-    
-    def FindFarestRelations():
         pass
     
