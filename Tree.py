@@ -18,6 +18,11 @@ class FamilyTree():
         """
         if self.root.name == person_name and self.root.birth_day == person_birthday:
             return self.root
+        else:
+            print("Not a root!")
+            print(self.root)
+            print(self.root.name)
+            print(self.root.birth_day)
         qeue = []
         root = self.root if root is None else root
         qeue.append(root)
@@ -27,22 +32,22 @@ class FamilyTree():
                 if c.name == person_name and c.birth_day == person_birthday:
                     return c
                 qeue.append(c)
-        print('person with name: ' + person_name , 'and birthday: ' + str(person_birthday) , ' not found in ', root.name,'\'s child')
-        return None    
+        return 'person with name: ' + person_name , 'and birthday: ' + str(person_birthday) , ' not found in ', root.name,'\'s child'
     
-    def AddPerson (self,dad_name,dad_birthday,child_name,child_birthday,child_deathday=None):
+    def AddPerson (self,parent_name,parent_birthday,child_name,child_birthday,child_deathday=None):
         """Gets tow persons by name and birthday then add child   
         input: 
-            dad_name,dad_birthday,child_name,child_birthday,child_deathday=None
+            parent_name,parent_birthday,child_name,child_birthday,child_deathday=None
         return:
-            None 
+            text if successful or not 
         """
-        dad = self.FindPerson(dad_name,dad_birthday)
-        if dad != None:
-            child = Person(child_name,child_birthday,dad,child_deathday)
-            dad.AddChild(child)
+        parent = self.FindPerson(parent_name,parent_birthday)
+        if type(parent) != str:
+            child = Person(child_name,child_birthday,parent,child_deathday)
+            parent.AddChild(child)
             self.All[child_name] = {child_birthday : child }
-        return           
+            return (child_name+" Successfully added")
+        return parent          
     
     def RemovePerson (self,person_name,person_birthday):
         """Gets a person by name and birthday and removes it from family tree (if it exists)   
@@ -52,13 +57,15 @@ class FamilyTree():
             None 
         """
         print('Removing a person will remove all his children')
-        a = input("you sure you want to remove? /n(Yes|No)")
+        a = input("you sure you want to remove?"+ "/n(Yes|No)")
         if not (a.lower() == 'yes' or a.lower() == 'y'):
             print('not removing so!')
             return
         p = self.FindPerson(person_name,person_birthday)
+        print("person_name: ", p.name)
         if p is not None:
             child_list = []
+            child_list.append(p)
             qeue = []
             qeue.append(p)
             while len(qeue) > 0:
@@ -68,12 +75,24 @@ class FamilyTree():
                     qeue.append(c)
             for c in child_list:
                 name = c.name
-                birthday = c.birthday
+                birthday = c.birth_day
+                parent = c.parent
+                parent.children.remove(c)
                 del self.All[name][birthday] 
+                if not len(self.All[name]):
+                    del self.All[name] 
+                print(self.All)              
                 del c
-                
         return        
     
+    def GetAllPersons(self):
+        res = []
+        for k,v in self.All.items():
+            opt = []
+            for val in v.keys():
+                opt.append(k + "_" + str(val))
+            res.extend(opt)
+        return res
     def GetSize(self):
         """returning size of family tree   
         input: 
@@ -86,29 +105,30 @@ class FamilyTree():
         qeue.append(self.root)
         while len(qeue) > 0:
             k = qeue.pop()
+            print(k.name)
             for c in k.children:
                 qeue.append(c)
             size +=1
-        print('size: ' + size)
+        print('size: ' +str(size))
         return size
      
-    def CheckIsParent(self,dad_name,dad_birthday,child_name,child_birthday):
+    def CheckIsParent(self,parent_name,parent_birthday,child_name,child_birthday):
         """Gets tow persons by name and birthday then find if some on is chile of another one
             not only his child but also child of his child and so on!
         input: 
-            dad_name,dad_birthday,child_name,child_birthday
+            parent_name,parent_birthday,child_name,child_birthday
         return:
             None 
         """
-        dad = self.FindPerson(dad_name,dad_birthday)
-        if dad is None:
+        parent = self.FindPerson(parent_name,parent_birthday)
+        if parent is None:
             return False
-        child = self.FindChild(child_name,child_birthday,root = dad)
+        child = self.FindChild(child_name,child_birthday,root = parent)
         if child is None:    
-            print(dad_name ,'is not father of ',child_name)
+            print(parent_name ,'is not father of ',child_name)
             return False
         else:
-            print(dad_name ,' is father of ',child_name)
+            print(parent_name ,' is father of ',child_name)
             return True
     
     def FindAllParents(self,person_name,person_birthday):
@@ -139,14 +159,12 @@ class FamilyTree():
         person2 = self.FindPerson(person2_name, person2_birthday)
         if person1 is None or person2 is None:
             return
-        dad1_list = self.FindAllParents(person1_name, person1_birthday)
-        dad2_list = self.FindAllParents(person2_name, person2_birthday)
+        parent1_list = self.FindAllParents(person1_name, person1_birthday)
+        parent2_list = self.FindAllParents(person2_name, person2_birthday)
         i = -1
-        while dad1_list[i] == dad2_list[i] and (abs(i)-1) < min(len(dad1_list), len(dad2_list)):
+        while parent1_list[i] == parent2_list[i] and (abs(i)-1) < min(len(parent1_list), len(parent2_list)):
             i-=1
-        return dad1_list[i]
-    
-
+        return parent1_list[i]
     
     def FindFarestBorn(self,person_name, person_birthday):
         """Gets a person by name and birthday then find farest born of him
