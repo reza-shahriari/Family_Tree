@@ -86,6 +86,7 @@ class FamilyTree():
                 opt.append(k + "_" + str(val))
             res.extend(opt)
         return res
+    
     def GetSize(self):
         """returning size of family tree   
         input: 
@@ -113,17 +114,24 @@ class FamilyTree():
         return:
             None 
         """
+        
+        #Check if child is parent :|
+        if child_name == parent_name and child_birthday == parent_birthday:
+            return "How can a person be his own parent? :|"
+        
+        #Check if child is the root
+        if child_name == self.root.name and child_birthday == self.root.birth_day:
+            return parent_name +' is not father of ' + child_name
+        
         parent = self.FindPerson(parent_name,parent_birthday)
-        if parent is None:
-            return False
-        child = self.FindChild(child_name,child_birthday,root = parent)
-        if child is None:    
-            print(parent_name ,'is not father of ',child_name)
-            return False
+        if type(parent) ==str:
+            return parent
+        child = self.FindPerson(child_name,child_birthday,root = parent)
+        if type(child) == str:    
+            return parent_name +' is not father of ' + child_name
         else:
-            print(parent_name ,' is father of ',child_name)
-            return True
-    
+            return parent_name + ' is father of '+ child_name
+
     def FindAllParents(self,person_name,person_birthday):
         """Gets a person by name and birthday then find all parents of that person
             input: 
