@@ -24,18 +24,15 @@ class Person():
         The person's children. None if no child. 
     """
     kind = 'person'
-    def __init__(self,name,birth_day,father,death_day = None,children=''):
+    all_persons = []
+    def __init__(self,name,birth_day,parent,death_day = None,children=''):
         self.name = name
         self.birth_day = birth_day
         self.death_day = death_day
         self.hashed_name = self.Hash(name)
-        self.father = father
+        self.parent = parent
         self.children = []
-        for i in children.strip().split(","):
-            if len(i):
-                self.children.append(Person(i.split(" ")[0],i.split(" ")[1],i.split(" ")[2]))
-                self.children[-1].father = self
-                
+        Person.all_persons.append(self)        
     def AddChild(self, name,birth_day,death_day = None):
         """add a person to this person's children.
         input: 

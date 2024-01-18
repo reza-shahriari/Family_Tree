@@ -5,7 +5,10 @@ class FamilyTree():
         self.root = grandfather
         self.size = 1
         self.max_lvl = 1
-                 
+        self.All = dict()
+        self.All[self.root.name] = {self.root.birth_day  : self.root}
+        
+    
     def FindPerson (self, person_name, person_birthday,root = None):
         """Gets a person by name and birthday and tell us if it exists   
         input: 
@@ -19,7 +22,7 @@ class FamilyTree():
         while len(qeue) > 0:
             k = qeue.pop()
             for c in k.children:
-                if c.name == person_name and c.birthday == person_birthday:
+                if c.name == person_name and c.birth_day == person_birthday:
                     return c
                 qeue.append(c)
         print('person with name: ' + person_name , 'and birthday: ' + person_birthday , ' not found in ', root.name,'\'s child')
@@ -34,7 +37,9 @@ class FamilyTree():
         """
         dad = self.FindPerson(dad_name,dad_birthday)
         if dad != None:
-            dad.AddChild(child_name,child_birthday,child_deathday)
+            child = Person(child_name,child_birthday,dad,child_deathday)
+            dad.AddChild(child)
+            self.All[child_name] = {child_birthday : child }
         return           
     
     def RemovePerson (self,person_name,person_birthday):
@@ -54,7 +59,7 @@ class FamilyTree():
         while len(qeue) > 0:
             k = qeue.pop()
             for c in k.children:
-                if c.name == person_name and c.birthday == person_birthday:
+                if c.name == person_name and c.birth_day == person_birthday:
                     k.children.remove(c)
                     print('successfully removed ')
                     return
@@ -99,22 +104,20 @@ class FamilyTree():
             print(dad_name ,' is father of ',child_name)
             return True
     
-    def FindNearsetDad(self,person1_name, person1_birthday ,person2_name, person2_birthday):
-        """Gets tow persons by name and birthday then find nearest common dad of them
+    def FindLCA(self,person1_name, person1_birthday ,person2_name, person2_birthday):
+        """Gets tow persons by name and birthday then find lowest common ancestor of them
         input: 
             person1_name, person1_birthday ,person2_name, person2_birthday
         return:
             None 
         """  
-        person1 = self.FindParent(person1_name, person1_birthday)
-        person2 = self.FindParent(person2_name, person2_birthday)
+        person1 = self.FindPerson(person1_name, person1_birthday)
+        person2 = self.FindPerson(person2_name, person2_birthday)
         if person1 is None or person2 is None:
             return
         dad1_list = []
         dad2_list = []
         
-        
-     
     def FindRelation(name1, name2):
         """Gets tow persons by name and find relationships between them
         input: 
