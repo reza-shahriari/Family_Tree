@@ -41,12 +41,12 @@ class MainMenu(QWidget):
         print(im.shape)
         all_persons = Person.all_persons
         for i in all_persons:
+            for child in i.children:
+                cv2.line(im,cordinates[i],cordinates[child],(94,194,0),2)
+        for i in all_persons:
             cv2.circle(im,cordinates[i],10,(153,153,0),-1)
             im = cv2.putText(im,i.name,(cordinates[i][0]+10,cordinates[i][1]-10),cv2.FONT_HERSHEY_SIMPLEX 
                              ,.5,(102,204,0),2,cv2.LINE_AA)
-        for i in all_persons:
-            for child in i.children:
-                cv2.line(im,cordinates[i],cordinates[child],(94,194,0),2)
         # Create an instance of the sub menu widget
         self.res_screen = ResScreen('Family Tree',self,im)
         # Show the sub menu and hide the main menu
@@ -433,9 +433,26 @@ class FindFarestRealationScreen(QWidget):
         self.submenu = submenu
     # Define the function to get the inputs and the option
     def get_inputs_and_option(self):
-        text = tree.FindFarestRelations()
+        text,persons = tree.FindFarestRelations()
+        h,w,cordinates = tree.VisualizeTree()
+        im = np.ones((h,w,3), dtype=np.uint8)*255
+        for i in [0,-1]:
+            cv2.circle(im,cordinates[persons[i]],15,(100,100,0),-1)
+            im = cv2.putText(im,persons[i].name,(cordinates[persons[i]][0]+10,cordinates[persons[i]][1]-10)
+                                    ,cv2.FONT_HERSHEY_SIMPLEX 
+                                    ,.5,(102,204,0),2,cv2.LINE_AA)
+        for i in range(1,len(persons)-1):
+                cv2.circle(im,cordinates[persons[i]],10,(153,153,0),-1)
+                im = cv2.putText(im,persons[i].name,(cordinates[persons[i]][0]+10,cordinates[persons[i]][1]-10)
+                                ,cv2.FONT_HERSHEY_SIMPLEX 
+                                ,.5,(102,204,0),2,cv2.LINE_AA)
+        for i in range(len(persons)-1):
+            c1 = cordinates[persons[i]]
+            c2 = cordinates[persons[i+1]]
+            color = (20,25,147) if c1[1] > c2[1] else (222,196,176)
+            cv2.arrowedLine(im,c1,c2,color,2)
         # Create an instance of the screen that shows the text
-        self.text_screen = ResScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu,im)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
@@ -478,12 +495,33 @@ class FindRelationbtw2(QWidget):
         person1 = self.list_widget1.currentItem().text() if self.list_widget1.currentItem() is not None else ""
         person2 = self.list_widget2.currentItem().text() if self.list_widget2.currentItem() is not None else ""
         # Call another function with the inputs and the option
+        im = None
         if  person1 != '' and person2 != '':
-            text = tree.FindRelation(person1.split('_')[0].strip(), int(person1.split('_')[1].strip()),person2.split('_')[0].strip(), int(person2.split('_')[1].strip()))
+            text,persons = tree.FindRelation(person1.split('_')[0].strip(), int(person1.split('_')[1].strip()),person2.split('_')[0].strip(), int(person2.split('_')[1].strip()))
+            
+            h,w,cordinates = tree.VisualizeTree()
+            im = np.ones((h,w,3), dtype=np.uint8)*255
+            for i in [0,-1]:
+                cv2.circle(im,cordinates[persons[i]],15,(100,100,0),-1)
+                im = cv2.putText(im,persons[i].name,(cordinates[persons[i]][0]+10,cordinates[persons[i]][1]-10)
+                                        ,cv2.FONT_HERSHEY_SIMPLEX 
+                                        ,.5,(102,204,0),2,cv2.LINE_AA)
+            for i in range(1,len(persons)-1):
+                    cv2.circle(im,cordinates[persons[i]],10,(153,153,0),-1)
+                    im = cv2.putText(im,persons[i].name,(cordinates[persons[i]][0]+10,cordinates[persons[i]][1]-10)
+                                     ,cv2.FONT_HERSHEY_SIMPLEX 
+                                    ,.5,(102,204,0),2,cv2.LINE_AA)
+            for i in range(len(persons)-1):
+                c1 = cordinates[persons[i]]
+                c2 = cordinates[persons[i+1]]
+                color = (20,25,147) if c1[1] > c2[1] else (222,196,176)
+                cv2.arrowedLine(im,c1,c2,color,2)
+                
+                    
             # Create an instance of the screen that shows the text
         else:
             text = 'Wrong inputs...'
-        self.text_screen = ResScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu,im)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()

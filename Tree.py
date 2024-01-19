@@ -54,7 +54,6 @@ class FamilyTree():
             None 
         """
         person = self.FindPerson(person_name,person_birthday)
-        print(type(person))
         if type(person) != str :
             child_list = []
             child_list.append(person)
@@ -157,12 +156,6 @@ class FamilyTree():
             return person2
         parent1_list = self.FindAllParents(person1)
         parent2_list = self.FindAllParents(person2)
-        # print('Parent list 1')
-        # for i in parent1_list:
-        #     print(i.name)
-        # print('parent list 2')
-        # for i in parent2_list:
-        #     print(i.name)
         i = -1
         lca_name = ''
         m = min(len(parent1_list), len(parent2_list))
@@ -245,7 +238,7 @@ class FamilyTree():
         p2,d = Find_distance(p1)
         s1 = self.FindRelation(p1.name,p1.birth_day,p2.name,p2.birth_day)
         
-        return '\tFarest realation is between '+p1.name + ' and ' + p2.name + ' and its: ' + str(d -1) + ' persons between them\n'+s1 
+        return '\tFarest realation is between '+p1.name + ' and ' + p2.name + ' and its: ' + str(d -1) + ' persons between them\n'+s1[0],s1[1] 
     
     def FindRelation(self,person1_name, person1_birthday ,person2_name, person2_birthday):
         """Gets tow persons by name and birthday then find realation between them
@@ -254,7 +247,8 @@ class FamilyTree():
         return:
             realation: str 
         """  
-        global res
+        global res,path
+        path = []
         res = ''    
         person1 = self.FindPerson(person1_name, person1_birthday)
         person2 = self.FindPerson(person2_name, person2_birthday)
@@ -267,16 +261,15 @@ class FamilyTree():
         visited = {}
         for i in all_persons:
             visited[i] = False
-        def printPath(stack):
-            global res
+        def printPath(stack,):
+            global res,path
+            for i in stack:
+                path.append(i)
             res = ''
             for i in range(len(stack) - 1):
-                res += stack[i] +  " -> "
-                print(stack[i],end=' -> ')
-            print(stack[-1])
-            res += stack[-1]
+                res += stack[i].name +  " -> "
+            res += stack[-1].name
         def Find_path(vis, x, y,stack,name_stack):
-            print("Finding path! between ", x.name, " and ", y.name)
             stack.append(x)
             if (x == y):
                 printPath(name_stack)
@@ -284,17 +277,18 @@ class FamilyTree():
             vis[x] = True
             j = x.parent
             if j is not None and vis[j] == False:
-                name_stack.append(j.name +'(parent)')
+                name_stack.append(j)
                 Find_path(vis, j, y, stack,name_stack)
             for j in x.children:
                 if (vis[j] == False):
-                    name_stack.append(j.name +'(child)')                    
+                    name_stack.append(j)                    
                     Find_path(vis, j,y,stack,name_stack)
             if stack: del stack[-1]
             if name_stack: del name_stack[-1]
         
-        Find_path(visited,person1,person2,[],[person1.name])
-        return res
+        Find_path(visited,person1,person2,[],[person1])
+        
+        return res, path
     
     def VisualizeTree(self):
         """create cordinates for persons to visualize them
@@ -321,15 +315,12 @@ class FamilyTree():
         number_of_children(self.root)
         for i in all_persons:
             tree_heigth = max(tree_heigth,i.level)
-        for i in all_persons:
-            print(i.name, max_in_lvl_dict[i])
         im_height = HEIGHT_PER_PERSON * tree_heigth
         im_width = WIDTH_PER_PERSON * max_in_lvl_dict[self.root]
         image_for_person[self.root] = [0,im_width, im_height]
         cordinate_for_person = {}
         qeue = deque()
         qeue.append(self.root)
-        # print(self.root.name,image_for_person[self.root])
         while len(qeue) > 0:
             p = qeue.pop()
             t_now = image_for_person[p][0]
