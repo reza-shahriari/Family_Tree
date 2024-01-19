@@ -1,5 +1,5 @@
 from Person import Person
-
+from collections import deque
 class FamilyTree():
     def __init__ (self, grandfather_name,grandfather_birthday,grandfather_deathday=None):
         self.root = Person(grandfather_name,grandfather_birthday,None,grandfather_deathday)
@@ -18,7 +18,7 @@ class FamilyTree():
         """
         if self.root.name == person_name and self.root.birth_day == person_birthday:
             return self.root
-        qeue = []
+        qeue = deque()
         root = self.root if root is None else root
         qeue.append(root)
         while len(qeue) > 0:
@@ -59,7 +59,7 @@ class FamilyTree():
         if type(person) != str :
             child_list = []
             child_list.append(person)
-            qeue = []
+            qeue = deque()
             qeue.append(person)
             while len(qeue) > 0:
                 q = qeue.pop()
@@ -94,17 +94,10 @@ class FamilyTree():
         return:
             size 
         """
-        qeue = []
-        size = 0
-        qeue.append(self.root)
-        while len(qeue) > 0:
-            k = qeue.pop()
-            print(k.name)
-            for c in k.children:
-                qeue.append(c)
-            size +=1
-        print('size: ' +str(size))
-        return size
+        res =0
+        for _,v in self.All.items():
+            res += len(v.values())
+        return 'Size of family tree is ' + str(res)
      
     def CheckIsParent(self,parent_name,parent_birthday,child_name,child_birthday):
         """Gets tow persons by name and birthday then find if some on is chile of another one
@@ -178,7 +171,7 @@ class FamilyTree():
             lca_name = parent1_list[i].name
             i-=1
         if lca_name != '':
-            return 'Lowest common ancestor is ' + lca_name
+            return 'Lowest common ancestor of'+ person1_name+' and '+person2_name+' is ' + lca_name
         else:
             return "No common ancestor found!"
     
@@ -191,7 +184,7 @@ class FamilyTree():
         """
         p = self.FindPerson(person_name,person_birthday)
         farest_born = p
-        if p is not None:
+        if type(p) != str:
             qeue = []
             qeue.append(p)
             while len(qeue) > 0:
@@ -199,14 +192,61 @@ class FamilyTree():
                 for c in k.children:
                     qeue.append(c)
                 if k.level > farest_born.level:
-                    fraset_born = k
-        if farest_born == p:
-            print("No child!")
+                    farest_born = k
+            if farest_born == p:
+                return ("No child!")
+            else:
+                return p.name +'\'s farest born is '+farest_born.name
         else:
-            return farest_born
+            return p
     
-    def FindFarestRelations():
-        pass
+    def FindFarestRelations(self):
+        """Find farest relations in Family tree
+        input:
+            Nothing
+        return:
+            longest path in the Family tree and its length
+        """
+        def Find_distance(u):
+            all_persons = []
+            for k,v in self.All.items():
+                for val in v.values():
+                    all_persons.append(val)
+                    
+            visited = {}
+            distance = {}
+            for i in all_persons:
+                visited[i] = False
+                distance[i] = -1
+                
+            distance[u] = 0
+            queue = deque()
+            queue.append(u)
+            visited[u] = True
+            while len(queue) > 0:
+                person = queue.popleft()
+                if person.parent is not None:
+                    if not visited[person.parent]:
+                        visited[person.parent] = True
+                        distance[person.parent] = distance[person]+1
+                        queue.append(person.parent)
+                        
+                for i in person.children:
+                    if not visited[i]:
+                        visited[i] = True
+                        distance[i] = distance[person]+1
+                        queue.append(i)
+
+            max_dis = 0
+            for i in all_persons:
+                if distance[i] > max_dis:
+                    max_dis = distance[i]
+                    far_person = i
+            return far_person, max_dis
+        
+        p1,d = Find_distance(self.root)
+        p2,d = Find_distance(p1)
+        return 'Farest realation is between '+p1.name + ' and ' + p2.name + ' and its: ' + str(d -1) + ' persons between them' 
     
     def FindRelation(name1, name2):
         """Gets tow persons by name and find relationships between them

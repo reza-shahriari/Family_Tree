@@ -79,9 +79,9 @@ class SubMenu(QWidget):
         self.button3.clicked.connect(self.function3)
         self.button4 = QPushButton("Find lowest common ancestor")
         self.button4.clicked.connect(self.function4)
-        self.button5 = QPushButton("Function 5")
+        self.button5 = QPushButton("Find Farest born")
         self.button5.clicked.connect(self.function5)
-        self.button6 = QPushButton("Function 6")
+        self.button6 = QPushButton("Find Farest realationship")
         self.button6.clicked.connect(self.function6)
         self.button7 = QPushButton("Function 7")
         self.button7.clicked.connect(self.function7)
@@ -119,23 +119,31 @@ class SubMenu(QWidget):
 
     def function3(self):
         # Create an instance of the new screen widget
-        self.new_screen = CheckIfParent(self)
+        self.new_screen = CheckIfParentScreen(self)
         # Show the new screen and hide the sub menu
         self.new_screen.show()
         self.hide()
 
     def function4(self):
         # Create an instance of the new screen widget
-        self.new_screen = FindLCA(self)
+        self.new_screen = FindLCAScreen(self)
         # Show the new screen and hide the sub menu
         self.new_screen.show()
         self.hide()
 
     def function5(self):
-        print("Function 5")
+        # Create an instance of the new screen widget
+        self.new_screen = FindFarestBornScreen(self)
+        # Show the new screen and hide the sub menu
+        self.new_screen.show()
+        self.hide()
 
     def function6(self):
-        print("Function 6")
+        # Create an instance of the new screen widget
+        self.new_screen = FindFarestRealationScreen(self)
+        # Show the new screen and hide the sub menu
+        self.new_screen.show()
+        self.hide()
 
     def function7(self):
         print("Function 7")
@@ -246,7 +254,7 @@ class RemovePersonScreen(QWidget):
         self.hide()
 
 # Define the CheckIfParent widget class
-class CheckIfParent(QWidget):
+class CheckIfParentScreen(QWidget):
     def __init__(self,submenu):
         super().__init__()
         # Set the window title and size
@@ -294,7 +302,7 @@ class CheckIfParent(QWidget):
         self.hide()
 
 # Define the FindLCA widget class
-class FindLCA(QWidget):
+class FindLCAScreen(QWidget):
     def __init__(self,submenu):
         super().__init__()
         # Set the window title and size
@@ -341,7 +349,81 @@ class FindLCA(QWidget):
         self.text_screen.show()
         self.hide()
 
+# Define the FindFarestBorn widget class
+class FindFarestBornScreen(QWidget):
+    def __init__(self,submenu):
+        super().__init__()
+        # Set the window title and size
+        self.setWindowTitle("Find farest born  Screen")
+        self.resize(300, 200)
+        # Create a grid layout to arrange the widgets
+        layout = QGridLayout()
+        # Create a list widget and add some items to it
+        self.list_widget = QListWidget()
+        options = tree.GetAllPersons()
+        self.list_widget.addItems(options)
+        self.button = QPushButton("Find")
+        # Connect the button's clicked signal to a function
+        self.button.clicked.connect(self.get_inputs_and_option)
+        # Add the widgets to the layout
+        self.list_label = QLabel("Choose a Person(name_birthday)")
+        layout.addWidget(self.list_widget, 1, 0, 1, 2)
+        layout.addWidget(self.button, 2, 0, 1, 2)
+        # Add the labels to the layout
+        layout.addWidget(self.list_label, 0, 0, 1, 2, alignment=Qt.AlignTop | Qt.AlignLeft)
+        
+        # Set the layout for the widget
+        self.setLayout(layout)
+        self.submenu = submenu
+    # Define the function to get the inputs and the option
+    def get_inputs_and_option(self):
+        # Get the text from the input widgets
+        # Get the current item from the list widget
+        option = self.list_widget.currentItem().text()
+        # Call another function with the inputs and the option
+        if  option != '':
+            text = tree.FindFarestBorn(option.split('_')[0].strip(), int(option.split('_')[1].strip()))
+        # Create an instance of the screen that shows the text
+        else:
+            text = 'Wrong inputs...'
+        self.text_screen = TextScreen(text,self.submenu)
+        # Show the text screen and hide the new screen
+        self.text_screen.show()
+        self.hide()
+# Define the FindFarestRealationScreen widget class
+class FindFarestRealationScreen(QWidget):
+    def __init__(self,submenu):
+        super().__init__()
+        # Set the window title and size
+        self.setWindowTitle("Find farest realation Screen")
+        self.resize(300, 200)
+        # Create a grid layout to arrange the widgets
+        layout = QGridLayout()
+        # Create a list widget and add some items to it
+        self.list_widget = QListWidget()
+        options = tree.GetAllPersons()
+        self.list_widget.addItems(options)
+        self.button = QPushButton("Find")
+        # Connect the button's clicked signal to a function
+        self.button.clicked.connect(self.get_inputs_and_option)
+        # Add the widgets to the layout
+        self.list_label = QLabel("Finding farest realation in the family tree")
+        layout.addWidget(self.button, 1, 0, 1, 2)
+        # Add the labels to the layout
+        layout.addWidget(self.list_label, 0, 0, 1, 2, alignment=Qt.AlignCenter )
+        # Set the layout for the widget
+        self.setLayout(layout)
+        self.submenu = submenu
+    # Define the function to get the inputs and the option
+    def get_inputs_and_option(self):
+        text = tree.FindFarestRelations()
+        # Create an instance of the screen that shows the text
+        self.text_screen = TextScreen(text,self.submenu)
+        # Show the text screen and hide the new screen
+        self.text_screen.show()
+        self.hide()
 
+# screen to show results and change menu
 class TextScreen(QWidget):
     def __init__(self,text,back_menu):
         super().__init__()
