@@ -205,14 +205,13 @@ class FamilyTree():
         input:
             Nothing
         return:
-            longest path in the Family tree and its length
+            longest path in the Family tree and its length :str
         """
         def Find_distance(u):
             all_persons = []
             for k,v in self.All.items():
                 for val in v.values():
-                    all_persons.append(val)
-                    
+                    all_persons.append(val)       
             visited = {}
             distance = {}
             for i in all_persons:
@@ -230,13 +229,11 @@ class FamilyTree():
                         visited[person.parent] = True
                         distance[person.parent] = distance[person]+1
                         queue.append(person.parent)
-                        
                 for i in person.children:
                     if not visited[i]:
                         visited[i] = True
                         distance[i] = distance[person]+1
                         queue.append(i)
-
             max_dis = 0
             for i in all_persons:
                 if distance[i] > max_dis:
@@ -246,14 +243,58 @@ class FamilyTree():
         
         p1,d = Find_distance(self.root)
         p2,d = Find_distance(p1)
-        return 'Farest realation is between '+p1.name + ' and ' + p2.name + ' and its: ' + str(d -1) + ' persons between them' 
+        s1 = self.FindRelation(p1.name,p1.birth_day,p2.name,p2.birth_day)
+        
+        return '\tFarest realation is between '+p1.name + ' and ' + p2.name + ' and its: ' + str(d -1) + ' persons between them\n'+s1 
     
-    def FindRelation(name1, name2):
-        """Gets tow persons by name and find relationships between them
+    def FindRelation(self,person1_name, person1_birthday ,person2_name, person2_birthday):
+        """Gets tow persons by name and birthday then find realation between them
         input: 
-            name1,name2
+            person1_name, person1_birthday ,person2_name, person2_birthday
         return:
-            relationship 
-        """
-        pass
-    
+            realation: str 
+        """  
+        global res
+        res = ''    
+        person1 = self.FindPerson(person1_name, person1_birthday)
+        person2 = self.FindPerson(person2_name, person2_birthday)
+        if type(person1) ==str:
+            return person1
+        if type(person2) ==str:
+            return person2
+
+        all_persons = []
+        for k,v in self.All.items():
+            for val in v.values():
+                all_persons.append(val)
+        visited = {}
+        for i in all_persons:
+            visited[i] = False
+        def printPath(stack):
+            global res
+            res = ''
+            for i in range(len(stack) - 1):
+                res += stack[i] +  " -> "
+                print(stack[i],end=' -> ')
+            print(stack[-1])
+            res += stack[-1]
+        def Find_path(vis, x, y,stack,name_stack):
+            print("Finding path! between ", x.name, " and ", y.name)
+            stack.append(x)
+            if (x == y):
+                printPath(name_stack)
+                return 
+            vis[x] = True
+            j = x.parent
+            if j is not None and vis[j] == False:
+                name_stack.append(j.name +'(parent)')
+                Find_path(vis, j, y, stack,name_stack)
+            for j in x.children:
+                if (vis[j] == False):
+                    name_stack.append(j.name +'(child)')                    
+                    Find_path(vis, j,y,stack,name_stack)
+            if stack: del stack[-1]
+            if name_stack: del name_stack[-1]
+        
+        Find_path(visited,person1,person2,[],[person1.name])
+        return res

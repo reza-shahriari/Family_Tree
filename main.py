@@ -83,9 +83,9 @@ class SubMenu(QWidget):
         self.button5.clicked.connect(self.function5)
         self.button6 = QPushButton("Find Farest realationship")
         self.button6.clicked.connect(self.function6)
-        self.button7 = QPushButton("Function 7")
+        self.button7 = QPushButton("Find path between 2 persons")
         self.button7.clicked.connect(self.function7)
-        self.button8 = QPushButton("Function 8")
+        self.button8 = QPushButton("see size")
         self.button8.clicked.connect(self.function8)
         self.button9 = QPushButton("Back to main menu")
         self.button9.clicked.connect(self.back_to_main_menu)
@@ -146,10 +146,18 @@ class SubMenu(QWidget):
         self.hide()
 
     def function7(self):
-        print("Function 7")
-
+        # Create an instance of the new screen widget
+        self.new_screen = FindRelationbtw2(self)
+        # Show the new screen and hide the sub menu
+        self.new_screen.show()
+        self.hide()
+    
     def function8(self):
-        print("Function 8")
+        # Create an instance of the new screen widget
+        self.new_screen = GetSizeScreen(self)
+        # Show the new screen and hide the sub menu
+        self.new_screen.show()
+        self.hide()
 
     # Define the method to go back to the main menu
     def back_to_main_menu(self):
@@ -390,12 +398,13 @@ class FindFarestBornScreen(QWidget):
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
+
 # Define the FindFarestRealationScreen widget class
 class FindFarestRealationScreen(QWidget):
     def __init__(self,submenu):
         super().__init__()
         # Set the window title and size
-        self.setWindowTitle("Find farest realation Screen")
+        self.setWindowTitle("farest realation Screen")
         self.resize(300, 200)
         # Create a grid layout to arrange the widgets
         layout = QGridLayout()
@@ -407,7 +416,7 @@ class FindFarestRealationScreen(QWidget):
         # Connect the button's clicked signal to a function
         self.button.clicked.connect(self.get_inputs_and_option)
         # Add the widgets to the layout
-        self.list_label = QLabel("Finding farest realation in the family tree")
+        self.list_label = QLabel("click Find to find farest realation in the family tree")
         layout.addWidget(self.button, 1, 0, 1, 2)
         # Add the labels to the layout
         layout.addWidget(self.list_label, 0, 0, 1, 2, alignment=Qt.AlignCenter )
@@ -417,6 +426,87 @@ class FindFarestRealationScreen(QWidget):
     # Define the function to get the inputs and the option
     def get_inputs_and_option(self):
         text = tree.FindFarestRelations()
+        # Create an instance of the screen that shows the text
+        self.text_screen = TextScreen(text,self.submenu)
+        # Show the text screen and hide the new screen
+        self.text_screen.show()
+        self.hide()
+
+# Define the FindRelationbtw2 widget class
+class FindRelationbtw2(QWidget):
+    def __init__(self,submenu):
+        super().__init__()
+        # Set the window title and size
+        self.setWindowTitle("Find relation between 2 persons Screen")
+        self.resize(300, 200)
+        # Create a grid layout to arrange the widgets
+        layout = QGridLayout()
+        # Create a list widget and add some items to it
+        self.list_widget1 = QListWidget()
+        self.list_widget2 = QListWidget()
+        options = tree.GetAllPersons()
+        self.list_widget1.addItems(options)
+        self.list_widget2.addItems(options)
+        self.button = QPushButton("Check")
+        # Connect the button's clicked signal to a function
+        self.button.clicked.connect(self.get_inputs_and_option)
+        # Add the widgets to the layout
+        self.list_label1 = QLabel("Choose The Person1")
+        self.list_label2 = QLabel("Choose The Person2")
+        layout.addWidget(self.list_widget1, 1, 0, 1, 2)
+        layout.addWidget(self.list_widget2, 3, 0, 1, 2)
+        layout.addWidget(self.button, 4, 0, 1, 2)
+        # Add the labels to the layout
+        layout.addWidget(self.list_label1, 0, 0, 1, 2, alignment=Qt.AlignTop | Qt.AlignLeft)
+        layout.addWidget(self.list_label2, 2, 0, 1, 2, alignment=Qt.AlignTop | Qt.AlignLeft)
+        
+        # Set the layout for the widget
+        self.setLayout(layout)
+        self.submenu = submenu
+    # Define the function to get the inputs and the option
+    def get_inputs_and_option(self):
+        # Get the text from the input widgets
+        # Get the current item from the list widget
+        person1 = self.list_widget1.currentItem().text()
+        person2 = self.list_widget2.currentItem().text()
+        # Call another function with the inputs and the option
+        if  person1 != '' and person2 != '':
+            text = tree.FindRelation(person1.split('_')[0].strip(), int(person1.split('_')[1].strip()),person2.split('_')[0].strip(), int(person2.split('_')[1].strip()))
+        # Create an instance of the screen that shows the text
+        else:
+            text = 'Wrong inputs...'
+        self.text_screen = TextScreen(text,self.submenu)
+        # Show the text screen and hide the new screen
+        self.text_screen.show()
+        self.hide()
+
+# Define the GetSize widget class
+class GetSizeScreen(QWidget):
+    def __init__(self,submenu):
+        super().__init__()
+        # Set the window title and size
+        self.setWindowTitle("Size Screen")
+        self.resize(300, 200)
+        # Create a grid layout to arrange the widgets
+        layout = QGridLayout()
+        # Create a list widget and add some items to it
+        self.list_widget = QListWidget()
+        options = tree.GetAllPersons()
+        self.list_widget.addItems(options)
+        self.button = QPushButton("Show")
+        # Connect the button's clicked signal to a function
+        self.button.clicked.connect(self.get_inputs_and_option)
+        # Add the widgets to the layout
+        self.list_label = QLabel("click show to see size of family tree")
+        layout.addWidget(self.button, 1, 0, 1, 2)
+        # Add the labels to the layout
+        layout.addWidget(self.list_label, 0, 0, 1, 2, alignment=Qt.AlignCenter )
+        # Set the layout for the widget
+        self.setLayout(layout)
+        self.submenu = submenu
+    # Define the function to get the inputs and the option
+    def get_inputs_and_option(self):
+        text = tree.GetSize()
         # Create an instance of the screen that shows the text
         self.text_screen = TextScreen(text,self.submenu)
         # Show the text screen and hide the new screen
