@@ -15,5 +15,5 @@ just run `main.py`
 - [x] Add features to it
 - [x] Add functions to it
 - [x] Analyze used algorithms
-- [ ] Visualize the tree
+- [x] Visualize the tree
 - [x] GUI
