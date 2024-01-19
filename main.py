@@ -1,5 +1,6 @@
 # Import PyQt5 modules
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox, QGridLayout, QListWidget, QLineEdit, QLabel
+from PyQt5.QtGui import QPixmap,QImage
 from PyQt5.QtCore import Qt,QTimer
 
 # Import custom classes 
@@ -9,17 +10,9 @@ from Name import name_generator
 name_gen = name_generator()
 #other imports
 import random
-
-# Define the functions that will be called when the buttons are clicked
-def see_the_tree():
-    print("See the tree function")
-
-def work_with_functions():
-    print("Work with functions function")
-
-def exit_app():
-    print("Exit app function")
-
+import numpy as np
+import cv2
+from PIL import Image, ImageQt
 # Define the main menu widget class
 class MainMenu(QWidget):
     def __init__(self):
@@ -31,20 +24,36 @@ class MainMenu(QWidget):
         layout = QGridLayout()
         # Create the buttons and connect them to the functions
         self.button1 = QPushButton("See the tree")
-        self.button1.clicked.connect(see_the_tree)
+        self.button1.clicked.connect(self.SeeTheTree)
         self.button2 = QPushButton("Work with functions")
-        self.button2.clicked.connect(self.open_sub_menu)
+        self.button2.clicked.connect(self.OpneSubMenu)
         self.button3 = QPushButton("Exit")
-        self.button3.clicked.connect(self.confirm_exit)
+        self.button3.clicked.connect(self.ConfirmExit)
         # Add the buttons to the layout
         layout.addWidget(self.button1, 0, 0)
         layout.addWidget(self.button2, 0, 1)
         layout.addWidget(self.button3, 1, 0, 1, 2)
         # Set the layout for the widget
         self.setLayout(layout)
-
+    def SeeTheTree(self):
+        h,w,cordinates = tree.VisualizeTree()
+        im = np.zeros((h,w,3), dtype=np.float32)
+        print(im.shape)
+        all_persons = Person.all_persons
+        for i in all_persons:
+            cv2.circle(im,cordinates[i],10,(100,100,100),-1)
+            im = cv2.putText(im,i.name,(cordinates[i][0]+10,cordinates[i][1]-10),cv2.FONT_HERSHEY_SIMPLEX 
+                             ,.5,(100,100,100),2,cv2.LINE_AA)
+        for i in all_persons:
+            for child in i.children:
+                cv2.line(im,cordinates[i],cordinates[child],(100,100,100),2)
+        # Create an instance of the sub menu widget
+        self.res_screen = ResScreen('Family Tree',self,im)
+        # Show the sub menu and hide the main menu
+        self.res_screen.show()
+        self.hide()
     # Define the method to open the sub menu
-    def open_sub_menu(self):
+    def OpneSubMenu(self):
         # Create an instance of the sub menu widget
         self.sub_menu = SubMenu()
         # Show the sub menu and hide the main menu
@@ -52,12 +61,11 @@ class MainMenu(QWidget):
         self.hide()
 
     # Define the method to confirm exit
-    def confirm_exit(self):
+    def ConfirmExit(self):
         # Create a message box to ask the user if they are sure
         reply = QMessageBox.question(self, "Exit", "Are you sure you want to exit?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         # If the user clicks yes, exit the app
         if reply == QMessageBox.Yes:
-            exit_app()
             QApplication.instance().quit()
         # Otherwise, do nothing
 
@@ -207,14 +215,14 @@ class AddPersonScreen(QWidget):
         input1 = self.input1.text()
         input2 = self.input2.text()
         # Get the current item from the list widget
-        option = self.list_widget.currentItem().text()
+        option = self.list_widget.currentItem().text() if self.list_widget.currentItem() is not None else ""
         # Call another function with the inputs and the option
         if input2 != '' and input2 != '' and option != '':
             text = tree.AddPerson(option.split('_')[0].strip(), int(option.split('_')[1].strip()),input1, input2)
         # Create an instance of the screen that shows the text
         else:
             text = 'Wrong inputs...'
-        self.text_screen = TextScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
@@ -249,14 +257,14 @@ class RemovePersonScreen(QWidget):
     def get_inputs_and_option(self):
         # Get the text from the input widgets
         # Get the current item from the list widget
-        option = self.list_widget.currentItem().text()
+        option = self.list_widget.currentItem().text() if self.list_widget.currentItem() is not None else ""
         # Call another function with the inputs and the option
         if  option != '':
             text = tree.RemovePerson(option.split('_')[0].strip(), int(option.split('_')[1].strip()))
         # Create an instance of the screen that shows the text
         else:
             text = 'Wrong inputs...'
-        self.text_screen = TextScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
@@ -296,15 +304,15 @@ class CheckIfParentScreen(QWidget):
     def get_inputs_and_option(self):
         # Get the text from the input widgets
         # Get the current item from the list widget
-        parent = self.list_widget1.currentItem().text()
-        child = self.list_widget2.currentItem().text()
+        parent = self.list_widget1.currentItem().text() if self.list_widget1.currentItem() is not None else ""
+        child = self.list_widget2.currentItem().text() if self.list_widget2.currentItem() is not None else ""
         # Call another function with the inputs and the option
         if  parent != '' and child != '':
             text = tree.CheckIsParent(parent.split('_')[0].strip(), int(parent.split('_')[1].strip()),child.split('_')[0].strip(), int(child.split('_')[1].strip()))
         # Create an instance of the screen that shows the text
         else:
             text = 'Wrong inputs...'
-        self.text_screen = TextScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
@@ -344,15 +352,15 @@ class FindLCAScreen(QWidget):
     def get_inputs_and_option(self):
         # Get the text from the input widgets
         # Get the current item from the list widget
-        person1 = self.list_widget1.currentItem().text()
-        person2 = self.list_widget2.currentItem().text()
+        person1 = self.list_widget1.currentItem().text() if self.list_widget1.currentItem() is not None else ""
+        person2 = self.list_widget2.currentItem().text() if self.list_widget2.currentItem() is not None else ""
         # Call another function with the inputs and the option
         if  person1 != '' and person2 != '':
             text = tree.FindLCA(person1.split('_')[0].strip(), int(person1.split('_')[1].strip()),person2.split('_')[0].strip(), int(person2.split('_')[1].strip()))
         # Create an instance of the screen that shows the text
         else:
             text = 'Wrong inputs...'
-        self.text_screen = TextScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
@@ -387,14 +395,14 @@ class FindFarestBornScreen(QWidget):
     def get_inputs_and_option(self):
         # Get the text from the input widgets
         # Get the current item from the list widget
-        option = self.list_widget.currentItem().text()
+        option = self.list_widget.currentItem().text() if self.list_widget.currentItem() is not None else ""
         # Call another function with the inputs and the option
         if  option != '':
             text = tree.FindFarestBorn(option.split('_')[0].strip(), int(option.split('_')[1].strip()))
         # Create an instance of the screen that shows the text
         else:
             text = 'Wrong inputs...'
-        self.text_screen = TextScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
@@ -427,7 +435,7 @@ class FindFarestRealationScreen(QWidget):
     def get_inputs_and_option(self):
         text = tree.FindFarestRelations()
         # Create an instance of the screen that shows the text
-        self.text_screen = TextScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
@@ -467,15 +475,15 @@ class FindRelationbtw2(QWidget):
     def get_inputs_and_option(self):
         # Get the text from the input widgets
         # Get the current item from the list widget
-        person1 = self.list_widget1.currentItem().text()
-        person2 = self.list_widget2.currentItem().text()
+        person1 = self.list_widget1.currentItem().text() if self.list_widget1.currentItem() is not None else ""
+        person2 = self.list_widget2.currentItem().text() if self.list_widget2.currentItem() is not None else ""
         # Call another function with the inputs and the option
         if  person1 != '' and person2 != '':
             text = tree.FindRelation(person1.split('_')[0].strip(), int(person1.split('_')[1].strip()),person2.split('_')[0].strip(), int(person2.split('_')[1].strip()))
-        # Create an instance of the screen that shows the text
+            # Create an instance of the screen that shows the text
         else:
             text = 'Wrong inputs...'
-        self.text_screen = TextScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
@@ -508,58 +516,74 @@ class GetSizeScreen(QWidget):
     def get_inputs_and_option(self):
         text = tree.GetSize()
         # Create an instance of the screen that shows the text
-        self.text_screen = TextScreen(text,self.submenu)
+        self.text_screen = ResScreen(text,self.submenu)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
 
-# screen to show results and change menu
-class TextScreen(QWidget):
-    def __init__(self,text,back_menu):
+class ResScreen(QWidget):
+
+    def convert_cv_qt(self, cv_img):
+        """Convert from an opencv image to QPixmap"""
+        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb_image.shape
+        bytes_per_line = ch * w
+        convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
+        return QPixmap.fromImage(p)
+
+    def __init__(self, text, back_menu, image=None):
         super().__init__()
         # Set the window title and size
         self.setWindowTitle("Text Screen")
-        self.resize(200, 100)
+        self.disply_width = 480
+        self.display_height = 270
+        self.image_label = QLabel(self)
+        self.resize(self.disply_width, self.display_height)
         # Create a grid layout to arrange the widget
         layout = QGridLayout()
         # Create a label widget and set the text to the message
         self.label = QLabel()
         self.label.setText(text)
         # Add the label to the layout
-        layout.addWidget(self.label, 0, 0, alignment=Qt.AlignCenter)
+        layout.addWidget(self.label, 1, 0, alignment=Qt.AlignCenter)
+        if image is not None:
+            img = self.convert_cv_qt(image)
+            self.image_label.setPixmap(img)
+            # Add the image to the layout
+            layout.addWidget(self.image_label, 0, 0, alignment=Qt.AlignCenter)
+        # Set the alignment and stretch of the layout
+        layout.setAlignment(Qt.AlignCenter)
+        layout.setRowStretch(0, 1)
+        layout.setRowStretch(2, 1)
         # Set the layout for the widget
         self.setLayout(layout)
         # Create a timer that will trigger a function after 3 seconds
-        QTimer.singleShot(2000, self.back_to_sub_menu)
+        if image is None:
+            QTimer.singleShot(2000, self.back_to_sub_menu)
+        if image is not None:
+            QTimer.singleShot(5000, self.back_to_sub_menu)
         self.back_menu = back_menu
+
     # Define the function that will be triggered by the timer
     def back_to_sub_menu(self):
         # Show the sub menu and close the text screen
         self.back_menu.show()
         self.close()
 
-           
-        
-name = ''
-birthday = ''
 def custom_tree(tree: FamilyTree):
     global name, birthday
     for i in range(10):
         all_p = Person.all_persons
         p = random.choice(all_p)
-        # print("parent is:",p.name)
         c_name = name_gen.generate()
-        name = c_name
         c_birth_day = random.randint(p.birth_day+20,p.birth_day +80)
-        birthday = c_birth_day
         tree.AddPerson(p.name,p.birth_day,c_name,c_birth_day)
 
 tree = FamilyTree('Reza',1700,1740)
 tree.AddPerson('Reza',1700,'moh',1738)
 custom_tree(tree)
-# print(tree.All)
-# tree.RemovePerson(name,birthday)
-# print(tree.GetSize())
+
 app = QApplication([])
 main_menu = MainMenu()
 main_menu.show()

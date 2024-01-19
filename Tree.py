@@ -4,10 +4,8 @@ class FamilyTree():
     def __init__ (self, grandfather_name,grandfather_birthday,grandfather_deathday=None):
         self.root = Person(grandfather_name,grandfather_birthday,None,grandfather_deathday)
         self.size = 1
-        self.max_lvl = 1
         self.All = dict()
         self.All[self.root.name] = {self.root.birth_day  : self.root}
-        
     
     def FindPerson (self, person_name, person_birthday,root = None):
         """Gets a person by name and birthday and tell us if it exists   
@@ -44,6 +42,7 @@ class FamilyTree():
                 self.All[child_name] = {int(child_birthday) : child }
             else:
                 self.All[child_name][int(child_birthday)]=  child 
+            self.size += 1
             return (child_name+" Successfully added")
         return parent          
     
@@ -71,7 +70,8 @@ class FamilyTree():
                 birthday = c.birth_day
                 parent = c.parent
                 parent.children.remove(c)
-                del self.All[name][birthday] 
+                del self.All[name][birthday]
+                self.size -= 1
                 if not len(self.All[name]):
                     del self.All[name]              
                 del c
@@ -94,10 +94,7 @@ class FamilyTree():
         return:
             size 
         """
-        res =0
-        for _,v in self.All.items():
-            res += len(v.values())
-        return 'Size of family tree is ' + str(res)
+        return 'Size of family tree is ' + str(self.size)
      
     def CheckIsParent(self,parent_name,parent_birthday,child_name,child_birthday):
         """Gets tow persons by name and birthday then find if some on is chile of another one
@@ -263,10 +260,7 @@ class FamilyTree():
         if type(person2) ==str:
             return person2
 
-        all_persons = []
-        for k,v in self.All.items():
-            for val in v.values():
-                all_persons.append(val)
+        all_persons = Person.all_persons
         visited = {}
         for i in all_persons:
             visited[i] = False
@@ -298,3 +292,58 @@ class FamilyTree():
         
         Find_path(visited,person1,person2,[],[person1.name])
         return res
+    
+    def VisualizeTree(self):
+        """create cordinates for persons to visualize them
+        input:
+            Nothing
+        return:
+            cordinates, size of image
+        """
+        global max_in_lvl_dict
+        
+        all_persons = Person.all_persons
+        tree_heigth = 0
+        max_in_lvl_dict = {}
+        image_for_person = {}
+        HEIGHT_PER_PERSON = 100
+        WIDTH_PER_PERSON = 100
+        #its to slow algorithm but it works!
+        def number_of_children(person,):
+            global max_in_lvl_dict
+            max_in_lvl_dict[person] = 1
+            for c in person.children:
+                number_of_children(c)
+                max_in_lvl_dict[person]+= max_in_lvl_dict[c]
+        number_of_children(self.root)
+        for i in all_persons:
+            tree_heigth = max(tree_heigth,i.level)
+        for i in all_persons:
+            print(i.name, max_in_lvl_dict[i])
+        im_height = HEIGHT_PER_PERSON * tree_heigth
+        im_width = WIDTH_PER_PERSON * max_in_lvl_dict[self.root]
+        image_for_person[self.root] = [0,im_width, im_height]
+        cordinate_for_person = {}
+        qeue = deque()
+        qeue.append(self.root)
+        # print(self.root.name,image_for_person[self.root])
+        while len(qeue) > 0:
+            p = qeue.pop()
+            t_now = image_for_person[p][0]
+            for c in p.children:
+                w = int(image_for_person[p][1] * max_in_lvl_dict[c]/max_in_lvl_dict[p])
+                image_for_person[c] = [t_now,w+t_now,int(image_for_person[p][2]) - WIDTH_PER_PERSON]
+                t_now += int(image_for_person[p][1] * (max_in_lvl_dict[c])/max_in_lvl_dict[p]) 
+                qeue.append(c)
+   
+        for i in all_persons:
+            h = int(im_height - image_for_person[i][2]+50)
+            w = int((image_for_person[i][0]+image_for_person[i][1])/2)
+            cordinate_for_person[i] = (w,h)
+            print(i.name,' ',image_for_person[i],' ',cordinate_for_person[i])
+        cordinate_for_person[self.root] = (int(im_width/2),50)
+
+        return im_height + HEIGHT_PER_PERSON , im_width+WIDTH_PER_PERSON ,cordinate_for_person   
+        
+            
+        
