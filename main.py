@@ -37,16 +37,16 @@ class MainMenu(QWidget):
         self.setLayout(layout)
     def SeeTheTree(self):
         h,w,cordinates = tree.VisualizeTree()
-        im = np.zeros((h,w,3), dtype=np.float32)
+        im = np.ones((h,w,3), dtype=np.uint8)*255
         print(im.shape)
         all_persons = Person.all_persons
         for i in all_persons:
-            cv2.circle(im,cordinates[i],10,(100,100,100),-1)
+            cv2.circle(im,cordinates[i],10,(153,153,0),-1)
             im = cv2.putText(im,i.name,(cordinates[i][0]+10,cordinates[i][1]-10),cv2.FONT_HERSHEY_SIMPLEX 
-                             ,.5,(100,100,100),2,cv2.LINE_AA)
+                             ,.5,(102,204,0),2,cv2.LINE_AA)
         for i in all_persons:
             for child in i.children:
-                cv2.line(im,cordinates[i],cordinates[child],(100,100,100),2)
+                cv2.line(im,cordinates[i],cordinates[child],(94,194,0),2)
         # Create an instance of the sub menu widget
         self.res_screen = ResScreen('Family Tree',self,im)
         # Show the sub menu and hide the main menu
@@ -526,18 +526,19 @@ class ResScreen(QWidget):
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""
         rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        rgb_image = cv2.resize(rgb_image,(self.disply_width, self.display_height))
         h, w, ch = rgb_image.shape
         bytes_per_line = ch * w
         convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
-        p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
-        return QPixmap.fromImage(p)
+        # p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
+        return QPixmap.fromImage(convert_to_Qt_format)
 
     def __init__(self, text, back_menu, image=None):
         super().__init__()
         # Set the window title and size
         self.setWindowTitle("Text Screen")
-        self.disply_width = 480
-        self.display_height = 270
+        self.disply_width = 1028 if image is not None else 300
+        self.display_height = 640 if image is not None else 200
         self.image_label = QLabel(self)
         self.resize(self.disply_width, self.display_height)
         # Create a grid layout to arrange the widget

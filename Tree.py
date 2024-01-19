@@ -74,7 +74,10 @@ class FamilyTree():
                 self.size -= 1
                 if not len(self.All[name]):
                     del self.All[name]              
+                Person.all_persons.remove(c)
                 del c
+                
+                
             return (person_name+' Successfully Removed')
         return person        
     
@@ -335,15 +338,21 @@ class FamilyTree():
                 image_for_person[c] = [t_now,w+t_now,int(image_for_person[p][2]) - WIDTH_PER_PERSON]
                 t_now += int(image_for_person[p][1] * (max_in_lvl_dict[c])/max_in_lvl_dict[p]) 
                 qeue.append(c)
-   
+        max_h = 0
+        max_w = 0
         for i in all_persons:
             h = int(im_height - image_for_person[i][2]+50)
+            max_h = max(max_h,h)
             w = int((image_for_person[i][0]+image_for_person[i][1])/2)
+            max_w = max(max_w,w)
             cordinate_for_person[i] = (w,h)
-            print(i.name,' ',image_for_person[i],' ',cordinate_for_person[i])
+        max_w += WIDTH_PER_PERSON
+        im_width = max_w
+        max_h += HEIGHT_PER_PERSON
+        im_height = max_h
         cordinate_for_person[self.root] = (int(im_width/2),50)
 
-        return im_height + HEIGHT_PER_PERSON , im_width+WIDTH_PER_PERSON ,cordinate_for_person   
+        return im_height  , im_width ,cordinate_for_person   
         
             
         
