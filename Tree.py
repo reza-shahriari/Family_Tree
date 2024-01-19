@@ -132,20 +132,20 @@ class FamilyTree():
         else:
             return parent_name + ' is father of '+ child_name
 
-    def FindAllParents(self,person_name,person_birthday):
+    def FindAllParents(self,person):
         """Gets a person by name and birthday then find all parents of that person
             input: 
                 person_name, person_birthday
             return:
                 parant_list 
         """
-        c = self.FindPerson(person_name, person_birthday)
         parent_list = []
-        if c is not None:
-            m = c.parent
-            while m != self.root:
-                parent_list.append(m)
-                m = m.parent
+        m = person.parent
+        parent_list.append(person)
+        while m is not None and m != self.root :
+            parent_list.append(m)
+            m = m.parent
+        if m is not None:    
             parent_list.append(m)
         return parent_list
             
@@ -158,14 +158,29 @@ class FamilyTree():
         """  
         person1 = self.FindPerson(person1_name, person1_birthday)
         person2 = self.FindPerson(person2_name, person2_birthday)
-        if person1 is None or person2 is None:
-            return
-        parent1_list = self.FindAllParents(person1_name, person1_birthday)
-        parent2_list = self.FindAllParents(person2_name, person2_birthday)
+        if type(person1) ==str:
+            return person1
+        if type(person2) ==str:
+            return person2
+        parent1_list = self.FindAllParents(person1)
+        parent2_list = self.FindAllParents(person2)
+        # print('Parent list 1')
+        # for i in parent1_list:
+        #     print(i.name)
+        # print('parent list 2')
+        # for i in parent2_list:
+        #     print(i.name)
         i = -1
-        while parent1_list[i] == parent2_list[i] and (abs(i)-1) < min(len(parent1_list), len(parent2_list)):
+        lca_name = ''
+        m = min(len(parent1_list), len(parent2_list))
+
+        while (abs(i)) <= m  and parent1_list[i] == parent2_list[i] :
+            lca_name = parent1_list[i].name
             i-=1
-        return parent1_list[i]
+        if lca_name != '':
+            return 'Lowest common ancestor is ' + lca_name
+        else:
+            return "No common ancestor found!"
     
     def FindFarestBorn(self,person_name, person_birthday):
         """Gets a person by name and birthday then find farest born of him

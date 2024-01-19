@@ -77,7 +77,7 @@ class SubMenu(QWidget):
         self.button2.clicked.connect(self.function2)
         self.button3 = QPushButton("Check if parent")
         self.button3.clicked.connect(self.function3)
-        self.button4 = QPushButton("Function 4")
+        self.button4 = QPushButton("Find lowest common ancestor")
         self.button4.clicked.connect(self.function4)
         self.button5 = QPushButton("Function 5")
         self.button5.clicked.connect(self.function5)
@@ -125,7 +125,11 @@ class SubMenu(QWidget):
         self.hide()
 
     def function4(self):
-        print("Function 4")
+        # Create an instance of the new screen widget
+        self.new_screen = FindLCA(self)
+        # Show the new screen and hide the sub menu
+        self.new_screen.show()
+        self.hide()
 
     def function5(self):
         print("Function 5")
@@ -289,6 +293,54 @@ class CheckIfParent(QWidget):
         self.text_screen.show()
         self.hide()
 
+# Define the FindLCA widget class
+class FindLCA(QWidget):
+    def __init__(self,submenu):
+        super().__init__()
+        # Set the window title and size
+        self.setWindowTitle("Find LCA screen")
+        self.resize(300, 200)
+        # Create a grid layout to arrange the widgets
+        layout = QGridLayout()
+        # Create a list widget and add some items to it
+        self.list_widget1 = QListWidget()
+        self.list_widget2 = QListWidget()
+        options = tree.GetAllPersons()
+        self.list_widget1.addItems(options)
+        self.list_widget2.addItems(options)
+        self.button = QPushButton("Find")
+        # Connect the button's clicked signal to a function
+        self.button.clicked.connect(self.get_inputs_and_option)
+        # Add the widgets to the layout
+        self.list_label1 = QLabel("Choose person1")
+        self.list_label2 = QLabel("Choose person2")
+        layout.addWidget(self.list_widget1, 1, 0, 1, 2)
+        layout.addWidget(self.list_widget2, 3, 0, 1, 2)
+        layout.addWidget(self.button, 4, 0, 1, 2)
+        # Add the labels to the layout
+        layout.addWidget(self.list_label1, 0, 0, 1, 2, alignment=Qt.AlignTop | Qt.AlignLeft)
+        layout.addWidget(self.list_label2, 2, 0, 1, 2, alignment=Qt.AlignTop | Qt.AlignLeft)
+        
+        # Set the layout for the widget
+        self.setLayout(layout)
+        self.submenu = submenu
+    # Define the function to get the inputs and the option
+    def get_inputs_and_option(self):
+        # Get the text from the input widgets
+        # Get the current item from the list widget
+        person1 = self.list_widget1.currentItem().text()
+        person2 = self.list_widget2.currentItem().text()
+        # Call another function with the inputs and the option
+        if  person1 != '' and person2 != '':
+            text = tree.FindLCA(person1.split('_')[0].strip(), int(person1.split('_')[1].strip()),person2.split('_')[0].strip(), int(person2.split('_')[1].strip()))
+        # Create an instance of the screen that shows the text
+        else:
+            text = 'Wrong inputs...'
+        self.text_screen = TextScreen(text,self.submenu)
+        # Show the text screen and hide the new screen
+        self.text_screen.show()
+        self.hide()
+
 
 class TextScreen(QWidget):
     def __init__(self,text,back_menu):
@@ -323,7 +375,7 @@ def custom_tree(tree: FamilyTree):
     for i in range(10):
         all_p = Person.all_persons
         p = random.choice(all_p)
-        print("parent is:",p.name)
+        # print("parent is:",p.name)
         c_name = name_gen.generate()
         name = c_name
         c_birth_day = random.randint(p.birth_day+20,p.birth_day +80)
@@ -332,8 +384,7 @@ def custom_tree(tree: FamilyTree):
 
 tree = FamilyTree('Reza',1700,1740)
 tree.AddPerson('Reza',1700,'moh',1738)
-print(tree.root.name)
-# custom_tree(tree)
+custom_tree(tree)
 # print(tree.All)
 # tree.RemovePerson(name,birthday)
 # print(tree.GetSize())
