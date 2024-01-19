@@ -1,6 +1,6 @@
 # Family Tree: Data Structure Final Project
 A project to create family tree,hashing data and saving them for more privacy
-
+just run `main.py`
 ## TODO
 - [x] Create a new project
 - [ ] Find best hashing algorithm 
