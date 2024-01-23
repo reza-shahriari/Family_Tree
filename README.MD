@@ -9,8 +9,8 @@ just run `main.py`
 
 ## TODO
 - [x] Create a new project
-- [ ] Find best hashing algorithm 
-- [ ] Implement the hash algorithm
+- [x] Find best hashing algorithm 
+- [x] Implement the hash algorithm
 - [x] Create person class
 - [x] Add features to it
 - [x] Add functions to it
