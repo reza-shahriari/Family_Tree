@@ -1,11 +1,12 @@
 from Person import Person
 from collections import deque
 class FamilyTree():
-    def __init__ (self, grandfather_name,grandfather_birthday,grandfather_deathday=None):
-        self.root = Person(grandfather_name,grandfather_birthday,None,grandfather_deathday)
+    def __init__ (self, grandfather_name,grandfather_birthday,):
+        self.root = Person(grandfather_name,grandfather_birthday,None,)
         self.size = 1
-        
-    
+    def AddRoot(self,root_name,root_birthday):    
+        self.root = Person(root_name,root_birthday,None)
+        self.size = 1
     def FindPerson (self, person_name, person_birthday,root = None):
         """Gets a person by name and birthday and tell us if it exists   
         input: 
@@ -31,16 +32,16 @@ class FamilyTree():
                 qeue.append(c)
         return 'person with name: ' + person_name + 'and birthday: ' + str(person_birthday) + ' not found in '+ root.name+'\'s child'
     
-    def AddPerson (self,parent_name,parent_birthday,child_name,child_birthday,child_deathday=None):
+    def AddPerson (self,parent_name,parent_birthday,child_name,child_birthday,):
         """Gets tow persons by name and birthday then add child   
         input: 
-            parent_name,parent_birthday,child_name,child_birthday,child_deathday=None
+            parent_name,parent_birthday,child_name,child_birthday
         return:
             text if successful or not 
         """
         parent = self.FindPerson(parent_name,parent_birthday)
         if type(parent) != str:
-            child = Person(child_name,int(child_birthday),parent,child_deathday)
+            child = Person(child_name,int(child_birthday),parent)
             parent.AddChild(child) 
             self.size += 1
             return (child_name+" Successfully added")
@@ -297,7 +298,6 @@ class FamilyTree():
         global max_in_lvl_dict
         
         all_persons = list(Person.all_persons.values())
-        print("all_persons: ", all_persons)
         tree_heigth = 0
         max_in_lvl_dict = {}
         image_for_person = {}
@@ -323,7 +323,6 @@ class FamilyTree():
             p = qeue.pop()
             t_now = image_for_person[p][0]
             for c in p.children:
-                print(type(c))
                 w = int(image_for_person[p][1] * max_in_lvl_dict[c]/max_in_lvl_dict[p])
                 image_for_person[c] = [t_now,w+t_now,int(image_for_person[p][2]) - WIDTH_PER_PERSON]
                 t_now += int(image_for_person[p][1] * (max_in_lvl_dict[c])/max_in_lvl_dict[p]) 

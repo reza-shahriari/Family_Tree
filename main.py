@@ -39,7 +39,6 @@ class MainMenu(QWidget):
     def SeeTheTree(self):
         h,w,cordinates = tree.VisualizeTree()
         im = np.ones((h,w,3), dtype=np.uint8)*255
-        print(im.shape)
         all_persons = list(Person.all_persons.values())
         for i in all_persons:
             for child in i.children:
@@ -186,7 +185,6 @@ class AddPersonScreen(QWidget):
         # Create a list widget and add some items to it
         self.list_widget = QListWidget()
         options = tree.GetAllPersons()
-        print("tree is: ", tree)
         self.tree = tree
         self.submenu = submenu
         self.list_widget.addItems(options)
@@ -215,22 +213,19 @@ class AddPersonScreen(QWidget):
         
     # Define the function to get the inputs and the option
     def get_inputs_and_option(self):
-        # print("tree is: ", tree)
         tree = self.tree
         # Get the text from the input widgets
         input1 = self.input1.text()
         input2 = self.input2.text()
         # Get the current item from the list widget
         option = self.list_widget.currentItem().text() if self.list_widget.currentItem() is not None else ""
-        print("tree is: " ,tree)
         # Call another function with the inputs and the option
         if input1 != '' and input2 != '' :
             if option != '':
                 text = tree.AddPerson(option.split('_')[0].strip(), int(option.split('_')[1].strip()),input1, input2)
             elif tree.GetSize()[1] == 0:
-                tree = FamilyTree(input1,int(input2))
+                tree.AddRoot(input1,int(input2))
                 text = input1 + ' succesfully added'
-            print(self.list_widget.baseSize())
         # Create an instance of the screen that shows the text
         else:
             text = 'Wrong inputs...'
@@ -631,8 +626,8 @@ def custom_tree(tree: FamilyTree):
         c_birth_day = random.randint(p.birth_day+20,p.birth_day +80)
         tree.AddPerson(p.name,p.birth_day,c_name,c_birth_day)
 
-tree = FamilyTree('Reza',1700,1740)
-tree.AddPerson('Reza',1700,'moh',1738)
+tree = FamilyTree('Reza',1700)
+tree.AddPerson('Reza',1700,'moh',1722)
 custom_tree(tree)
 
 app = QApplication([])

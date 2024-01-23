@@ -11,8 +11,6 @@ class Person():
         The year the person was born.
     parent: Person
         parent of the person
-    death_year : int
-        The year the person died. None if the person is still alive.
     hashed_name : str
         Just saving the name in hashed form for security.
     children : List of 'Person' Object
@@ -20,10 +18,9 @@ class Person():
     """
     kind = 'person'
     all_persons = {}
-    def __init__(self,name,birth_day,parent,death_day = None):
+    def __init__(self,name,birth_day,parent,):
         self.name = name
         self.birth_day = birth_day
-        self.death_day = death_day
         self.hashed_name = Person.Hash(name,birth_day)
         self.parent = parent
         if parent is not None:
