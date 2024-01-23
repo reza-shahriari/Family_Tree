@@ -4,25 +4,29 @@ class FamilyTree():
     def __init__ (self, grandfather_name,grandfather_birthday,grandfather_deathday=None):
         self.root = Person(grandfather_name,grandfather_birthday,None,grandfather_deathday)
         self.size = 1
-        self.All = dict()
-        self.All[self.root.name] = {self.root.birth_day  : self.root}
+        
     
     def FindPerson (self, person_name, person_birthday,root = None):
         """Gets a person by name and birthday and tell us if it exists   
         input: 
             person_name,person_birthday
         return:
-            None 
+            person or str msg if no person 
         """
-        if self.root.name == person_name and self.root.birth_day == person_birthday:
+        hashed = Person.Hash(person_name, person_birthday)
+        if self.root.hashed_name == hashed:
             return self.root
+        if root is None:
+            if Person.all_persons.get(hashed,False):
+                return Person.all_persons[hashed]
+            return 'person with name: ' + person_name + 'and birthday: ' + str(person_birthday) + ' not found in The tree'
         qeue = deque()
         root = self.root if root is None else root
         qeue.append(root)
         while len(qeue) > 0:
             k = qeue.pop()
             for c in k.children:
-                if c.name == person_name and c.birth_day == person_birthday:
+                if c.hashed_name == hashed:
                     return c
                 qeue.append(c)
         return 'person with name: ' + person_name + 'and birthday: ' + str(person_birthday) + ' not found in '+ root.name+'\'s child'
@@ -37,11 +41,7 @@ class FamilyTree():
         parent = self.FindPerson(parent_name,parent_birthday)
         if type(parent) != str:
             child = Person(child_name,int(child_birthday),parent,child_deathday)
-            parent.AddChild(child)
-            if not self.All.get(child_name):
-                self.All[child_name] = {int(child_birthday) : child }
-            else:
-                self.All[child_name][int(child_birthday)]=  child 
+            parent.AddChild(child) 
             self.size += 1
             return (child_name+" Successfully added")
         return parent          
@@ -51,10 +51,17 @@ class FamilyTree():
         input: 
             person_name,person_birthday
         return:
-            None 
+            str msg (success or not found) 
         """
         person = self.FindPerson(person_name,person_birthday)
-        if type(person) != str :
+        if person == self.root:
+            for c in Person.all_persons.values():
+                del c
+            self.size = 0 
+            while len(list(Person.all_persons.keys())):
+                del Person.all_persons[list(Person.all_persons.keys())[-1]]
+            return (person_name+' Successfully Removed')
+        elif type(person) != str :
             child_list = []
             child_list.append(person)
             qeue = deque()
@@ -65,28 +72,21 @@ class FamilyTree():
                     child_list.append(c)
                     qeue.append(c)
             for c in child_list:
-                name = c.name
-                birthday = c.birth_day
                 parent = c.parent
                 parent.children.remove(c)
-                del self.All[name][birthday]
-                self.size -= 1
-                if not len(self.All[name]):
-                    del self.All[name]              
-                Person.all_persons.remove(c)
+                self.size -= 1             
+                del Person.all_persons[c.hashed_name]
                 del c
-                
-                
             return (person_name+' Successfully Removed')
         return person        
     
     def GetAllPersons(self):
+        
+        all_persons = list(Person.all_persons.values())
         res = []
-        for k,v in self.All.items():
-            opt = []
-            for val in v.keys():
-                opt.append(k + "_" + str(val))
-            res.extend(opt)
+        for prs in all_persons:
+            opt = prs.name + '_' + str(prs.birth_day)
+            res.append(opt)
         return res
     
     def GetSize(self):
@@ -96,7 +96,7 @@ class FamilyTree():
         return:
             size 
         """
-        return 'Size of family tree is ' + str(self.size)
+        return 'Size of family tree is ' + str(self.size),self.size
      
     def CheckIsParent(self,parent_name,parent_birthday,child_name,child_birthday):
         """Gets tow persons by name and birthday then find if some on is chile of another one
@@ -113,16 +113,16 @@ class FamilyTree():
         
         #Check if child is the root
         if child_name == self.root.name and child_birthday == self.root.birth_day:
-            return parent_name +' is not father of ' + child_name
+            return parent_name +' is not parent of ' + child_name
         
         parent = self.FindPerson(parent_name,parent_birthday)
         if type(parent) ==str:
             return parent
         child = self.FindPerson(child_name,child_birthday,root = parent)
         if type(child) == str:    
-            return parent_name +' is not father of ' + child_name
+            return parent_name +' is not parent of ' + child_name
         else:
-            return parent_name + ' is father of '+ child_name
+            return parent_name + ' is parent of '+ child_name
 
     def FindAllParents(self,person):
         """Gets a person by name and birthday then find all parents of that person
@@ -164,7 +164,7 @@ class FamilyTree():
             lca_name = parent1_list[i].name
             i-=1
         if lca_name != '':
-            return 'Lowest common ancestor of'+ person1_name+' and '+person2_name+' is ' + lca_name
+            return 'Lowest common ancestor of '+ person1_name+' and '+person2_name+' is ' + lca_name
         else:
             return "No common ancestor found!"
     
@@ -201,10 +201,7 @@ class FamilyTree():
             longest path in the Family tree and its length :str
         """
         def Find_distance(u):
-            all_persons = []
-            for k,v in self.All.items():
-                for val in v.values():
-                    all_persons.append(val)       
+            all_persons = list(Person.all_persons.values())
             visited = {}
             distance = {}
             for i in all_persons:
@@ -257,7 +254,7 @@ class FamilyTree():
         if type(person2) ==str:
             return person2
 
-        all_persons = Person.all_persons
+        all_persons = list(Person.all_persons.values()) 
         visited = {}
         for i in all_persons:
             visited[i] = False
@@ -299,7 +296,8 @@ class FamilyTree():
         """
         global max_in_lvl_dict
         
-        all_persons = Person.all_persons
+        all_persons = list(Person.all_persons.values())
+        print("all_persons: ", all_persons)
         tree_heigth = 0
         max_in_lvl_dict = {}
         image_for_person = {}
@@ -325,6 +323,7 @@ class FamilyTree():
             p = qeue.pop()
             t_now = image_for_person[p][0]
             for c in p.children:
+                print(type(c))
                 w = int(image_for_person[p][1] * max_in_lvl_dict[c]/max_in_lvl_dict[p])
                 image_for_person[c] = [t_now,w+t_now,int(image_for_person[p][2]) - WIDTH_PER_PERSON]
                 t_now += int(image_for_person[p][1] * (max_in_lvl_dict[c])/max_in_lvl_dict[p]) 

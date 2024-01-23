@@ -19,20 +19,19 @@ class Person():
         The person's children. None if no child. 
     """
     kind = 'person'
-    all_persons = []
+    all_persons = {}
     def __init__(self,name,birth_day,parent,death_day = None):
         self.name = name
         self.birth_day = birth_day
         self.death_day = death_day
-        self.hashed_name = self.Hash(name)
+        self.hashed_name = Person.Hash(name,birth_day)
         self.parent = parent
         if parent is not None:
             self.level = parent.level + 1
         else:
             self.level = 1
-        
         self.children = []
-        Person.all_persons.append(self)        
+        Person.all_persons[self.hashed_name] = self        
     def AddChild(self,child):
         """add a person to this person's children.
         input: 
@@ -41,10 +40,12 @@ class Person():
             None
         """
         self.children.append(child)
+    
     def __del__(self):
-        Person.all_persons.remove(self)
-          
-    def Hash(self, name):
+        del Person.all_persons[self.hashed_name]
+    
+    @staticmethod      
+    def Hash(name,birth_day):
         # Define the initial hash values
         h0 = 0x6a09e667
         h1 = 0xbb67ae85
@@ -102,7 +103,7 @@ class Person():
             return msg_bin
 
         # Pad the input name
-        msg = pad(self.name)
+        msg = pad(name+' '+str(birth_day))
 
         # Divide the message into 512-bit chunks
         chunks = [msg[i:i + 512] for i in range(0, len(msg), 512)]

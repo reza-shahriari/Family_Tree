@@ -35,11 +35,12 @@ class MainMenu(QWidget):
         layout.addWidget(self.button3, 1, 0, 1, 2)
         # Set the layout for the widget
         self.setLayout(layout)
+    
     def SeeTheTree(self):
         h,w,cordinates = tree.VisualizeTree()
         im = np.ones((h,w,3), dtype=np.uint8)*255
         print(im.shape)
-        all_persons = Person.all_persons
+        all_persons = list(Person.all_persons.values())
         for i in all_persons:
             for child in i.children:
                 cv2.line(im,cordinates[i],cordinates[child],(94,194,0),2)
@@ -185,6 +186,9 @@ class AddPersonScreen(QWidget):
         # Create a list widget and add some items to it
         self.list_widget = QListWidget()
         options = tree.GetAllPersons()
+        print("tree is: ", tree)
+        self.tree = tree
+        self.submenu = submenu
         self.list_widget.addItems(options)
         # Create two input widgets and a button widget
         self.input1 = QLineEdit()
@@ -208,17 +212,25 @@ class AddPersonScreen(QWidget):
         
         # Set the layout for the widget
         self.setLayout(layout)
-        self.submenu = submenu
+        
     # Define the function to get the inputs and the option
     def get_inputs_and_option(self):
+        # print("tree is: ", tree)
+        tree = self.tree
         # Get the text from the input widgets
         input1 = self.input1.text()
         input2 = self.input2.text()
         # Get the current item from the list widget
         option = self.list_widget.currentItem().text() if self.list_widget.currentItem() is not None else ""
+        print("tree is: " ,tree)
         # Call another function with the inputs and the option
-        if input2 != '' and input2 != '' and option != '':
-            text = tree.AddPerson(option.split('_')[0].strip(), int(option.split('_')[1].strip()),input1, input2)
+        if input1 != '' and input2 != '' :
+            if option != '':
+                text = tree.AddPerson(option.split('_')[0].strip(), int(option.split('_')[1].strip()),input1, input2)
+            elif tree.GetSize()[1] == 0:
+                tree = FamilyTree(input1,int(input2))
+                text = input1 + ' succesfully added'
+            print(self.list_widget.baseSize())
         # Create an instance of the screen that shows the text
         else:
             text = 'Wrong inputs...'
@@ -554,7 +566,7 @@ class GetSizeScreen(QWidget):
     def get_inputs_and_option(self):
         text = tree.GetSize()
         # Create an instance of the screen that shows the text
-        self.text_screen = ResScreen(text,self.submenu)
+        self.text_screen = ResScreen(text[0],self.submenu)
         # Show the text screen and hide the new screen
         self.text_screen.show()
         self.hide()
@@ -613,7 +625,7 @@ class ResScreen(QWidget):
 def custom_tree(tree: FamilyTree):
     global name, birthday
     for i in range(10):
-        all_p = Person.all_persons
+        all_p = list(Person.all_persons.values())
         p = random.choice(all_p)
         c_name = name_gen.generate()
         c_birth_day = random.randint(p.birth_day+20,p.birth_day +80)
